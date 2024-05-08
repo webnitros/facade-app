@@ -12,39 +12,35 @@ switch ($modx->event->name) {
         $data = $modx->getVersionData();
 
         if ($data['version'] == 2) {
-            // Подключаем автозагрузчик только для версии MODX 2.0 и выше
-            include_once MODX_CORE_PATH . 'components/FacadeApp/vendor/autoload.php';
 
-            $app = app();
-            $app->singleton('modx', function () use ($modx){
-                return $modx;
-            });
+            $autoload = MODX_CORE_PATH . 'components/FacadeApp/vendor/autoload.php';
+            if (!file_exists($autoload)) {
+                $modx->log(modX::LOG_LEVEL_ERROR, 'Plugin FacadeApp Not found autoload.php in ' . $autoload);
+            } else {
 
-            /*
-             * Event reg for FacadeAppAddSingleton
-             * $app->singleton('myapp', function () use ($modx) {
-             *      return $modx->getService('myapp');
-             * });
-             * */
-            $modx->invokeEvent('FacadeAppAddSingleton', [
-                'app' => $app
-            ]);
+                // Подключаем автозагрузчик только для версии MODX 2.0 и выше
+                include_once $autoload;
 
-            Facade::clearResolvedInstances();
-            Facade::setFacadeApplication($app);
+                $app = app();
+                $app->singleton('modx', function () use ($modx) {
+                    return $modx;
+                });
 
+                $modx->invokeEvent('FacadeAppAddSingleton', [
+                    'app' => $app
+                ]);
+
+                Facade::clearResolvedInstances();
+                Facade::setFacadeApplication($app);
+
+            }
         } else {
 
-            /*
-             * From MODX 3.0 add FacadeAppAddSingleton event
-             $app->add('myapp', function () use ($modx) {
-                return  $modx->services->get('myapp');
-            });
-            */
-
+            $modx->services->add('modx', $modx);
             $modx->invokeEvent('FacadeAppAddSingleton', [
                 'app' => $modx->services
             ]);
+
 
             Facade::clearResolvedInstances();
             Facade::setFacadeApplication($modx->services);
