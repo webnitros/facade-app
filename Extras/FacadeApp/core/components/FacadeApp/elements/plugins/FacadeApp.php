@@ -16,8 +16,8 @@ switch ($modx->event->name) {
             include_once MODX_CORE_PATH . 'components/FacadeApp/vendor/autoload.php';
 
             $app = app();
-            $app->singleton('modx', function () {
-                return $this->modx;
+            $app->singleton('modx', function () use ($modx){
+                return $modx;
             });
 
             /*
