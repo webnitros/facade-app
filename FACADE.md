@@ -29,6 +29,8 @@ Plugin:
 
 ```php
 <?php
+
+# modx 2
 $app->singleton('pdo', function () use ($modx) {
     $fqn = $modx->getOption('pdoFetch.class', null, 'pdotools.pdofetch', true);
     $path = $modx->getOption('pdofetch_class_path', null, MODX_CORE_PATH . 'components/pdotools/model/', true);
@@ -38,6 +40,11 @@ $app->singleton('pdo', function () use ($modx) {
         return false;
     }
     return $pdoFetch;
+});
+
+# modx 3 то же самое только $app->add('pdo', ...
+$app->add('pdo', function () use ($modx) {
+    return new MyClass();
 });
 ```
 

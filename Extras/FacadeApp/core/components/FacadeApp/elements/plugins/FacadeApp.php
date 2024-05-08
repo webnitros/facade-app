@@ -11,12 +11,13 @@ switch ($modx->event->name) {
 
         $data = $modx->getVersionData();
 
-        if ($data['version'] == 2) {
+        $autoload = MODX_CORE_PATH . 'components/FacadeApp/vendor/autoload.php';
+        if (!file_exists($autoload)) {
+            $modx->log(modX::LOG_LEVEL_ERROR, 'Plugin FacadeApp Not found autoload.php in ' . $autoload);
+        } else {
 
-            $autoload = MODX_CORE_PATH . 'components/FacadeApp/vendor/autoload.php';
-            if (!file_exists($autoload)) {
-                $modx->log(modX::LOG_LEVEL_ERROR, 'Plugin FacadeApp Not found autoload.php in ' . $autoload);
-            } else {
+            if ($data['version'] == 2) {
+
 
                 // Подключаем автозагрузчик только для версии MODX 2.0 и выше
                 include_once $autoload;
@@ -33,20 +34,20 @@ switch ($modx->event->name) {
                 Facade::clearResolvedInstances();
                 Facade::setFacadeApplication($app);
 
+
+            } else {
+
+                $modx->services->add('modx', $modx);
+                $modx->invokeEvent('FacadeAppAddSingleton', [
+                    'app' => $modx->services
+                ]);
+
+
+                Facade::clearResolvedInstances();
+                Facade::setFacadeApplication($modx->services);
+
             }
-        } else {
-
-            $modx->services->add('modx', $modx);
-            $modx->invokeEvent('FacadeAppAddSingleton', [
-                'app' => $modx->services
-            ]);
-
-
-            Facade::clearResolvedInstances();
-            Facade::setFacadeApplication($modx->services);
-
         }
-
         break;
 }
 return '';
